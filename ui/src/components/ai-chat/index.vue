@@ -613,6 +613,21 @@ onMounted(() => {
   }, 1800)
 })
 
+const autoPasteFromClipboard = async () => {
+  try {
+    const text = await navigator.clipboard.readText()
+    if (text) {
+      inputValue.value = text
+    }
+  } catch (err) {
+    console.error('Failed to read clipboard contents: ', err)
+  }
+}
+
+onMounted(() => {
+  autoPasteFromClipboard()
+})
+
 defineExpose({
   setScrollBottom
 })
