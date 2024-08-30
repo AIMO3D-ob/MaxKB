@@ -31,6 +31,23 @@ def write_context(step_variable: Dict, global_variable: Dict, node, workflow):
     node.context['run_time'] = time.time() - node.context['start_time']
 
 
+def valid_reference_value(_type, value, name):
+    if _type == 'int':
+        instance_type = int
+    elif _type == 'float':
+        instance_type = float
+    elif _type == 'dict':
+        instance_type = dict
+    elif _type == 'array':
+        instance_type = list
+    elif _type == 'string':
+        instance_type = str
+    else:
+        raise Exception(500, f'字段:{name}类型:{_type} 不支持的类型')
+    if not isinstance(value, instance_type):
+        raise Exception(f'字段:{name}类型:{_type}值:{value}类型错误')
+
+
 def convert_value(name: str, value, _type, is_required, source, node):
     if not is_required and value is None:
         return None
@@ -38,6 +55,7 @@ def convert_value(name: str, value, _type, is_required, source, node):
         value = node.workflow_manage.get_reference_field(
             value[0],
             value[1:])
+        valid_reference_value(_type, value, name)
         return value
     try:
         if _type == 'int':
@@ -45,12 +63,18 @@ def convert_value(name: str, value, _type, is_required, source, node):
         if _type == 'float':
             return float(value)
         if _type == 'dict':
-            return json.loads(value)
+            v = json.loads(value)
+            if isinstance(v, dict):
+                return v
+            raise Exception("类型错误")
         if _type == 'array':
-            return json.loads(value)
+            v = json.loads(value)
+            if isinstance(v, list):
+                return v
+            raise Exception("类型错误")
         return value
     except Exception as e:
-        raise AppApiException(500, f'字段:{name}类型:{_type}值:{value}类型转换错误')
+        raise Exception(f'字段:{name}类型:{_type}值:{value}类型错误')
 
 
 class BaseFunctionNodeNode(IFunctionNode):

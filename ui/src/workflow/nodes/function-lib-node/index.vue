@@ -4,10 +4,6 @@
     <h5 class="lighter mb-8">输入变量</h5>
     <el-form
       @submit.prevent
-      @mousemove.stop
-      @mousedown.stop
-      @keydown.stop
-      @click.stop
       ref="FunctionNodeFormRef"
       :model="chat_data"
       label-position="top"
@@ -28,9 +24,9 @@
             >
               <template #label>
                 <div class="flex-between">
-                  <div>
-                    <span>
-                      <auto-tooltip :content="item.name">
+                  <div class="flex">
+                    <span class="flex">
+                      <auto-tooltip :content="item.name" style="max-width: 130px">
                         {{ item.name }}
                       </auto-tooltip>
                       <span class="danger" v-if="item.is_required">*</span></span

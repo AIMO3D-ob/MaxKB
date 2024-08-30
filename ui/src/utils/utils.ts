@@ -38,14 +38,14 @@ export function fileType(name: string) {
   获得文件对应图片
 */
 const typeList: any = {
-  txt: ['txt', 'pdf', 'docx', 'csv', 'md', 'html'],
+  txt: ['txt', 'pdf', 'docx', 'csv', 'md', 'html', 'PDF'],
   QA: ['xlsx', 'csv', 'xls']
 }
 
 export function getImgUrl(name: string) {
   const list = Object.values(typeList).flat()
 
-  const type = list.includes(fileType(name)) ? fileType(name) : 'unknow'
+  const type = list.includes(fileType(name.toLowerCase())) ? fileType(name.toLowerCase()) : 'unknow'
   return new URL(`../assets/${type}-icon.svg`, import.meta.url).href
 }
 // 是否是白名单后缀

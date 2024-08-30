@@ -10,7 +10,7 @@
 </p>
 <hr/>
 
-MaxKB = Max Knowledge Base，是一款基于 LLM 大语言模型的开源知识库问答系统，旨在成为企业的最强大脑。
+MaxKB = Max Knowledge Base，是一款基于 LLM 大语言模型的开源知识库问答系统，广泛应用于企业内部知识库、客户服务、学术研究与教育等场景。
 
 - **开箱即用**：支持直接上传文档、自动爬取在线文档，支持文本自动拆分、向量化、RAG（检索增强生成），智能问答交互体验好；
 - **模型中立**：支持对接各种大语言模型，包括本地私有大模型（Llama 3 / Qwen 2 等）、国内公共大模型（通义千问 / 智谱 AI / 百度千帆 / Kimi / DeepSeek 等）和国外公共大模型（OpenAI / Azure OpenAI / Gemini 等）；
@@ -20,7 +20,7 @@ MaxKB = Max Knowledge Base，是一款基于 LLM 大语言模型的开源知识�
 ## 快速开始
 
 ```
-docker run -d --name=maxkb -p 8080:8080 -v ~/.maxkb:/var/lib/postgresql/data cr2.fit2cloud.com/1panel/maxkb
+docker run -d --name=maxkb -p 8080:8080 -v ~/.maxkb:/var/lib/postgresql/data -v ~/.python-packages:/opt/maxkb/app/sandbox/python-packages cr2.fit2cloud.com/1panel/maxkb
 
 # 用户名: admin
 # 密码: MaxKB@123..
@@ -66,7 +66,7 @@ docker run -d --name=maxkb -p 8080:8080 -v ~/.maxkb:/var/lib/postgresql/data cr2
 - [1Panel](https://github.com/1panel-dev/1panel/) - 现代化、开源的 Linux 服务器运维管理面板
 - [JumpServer](https://github.com/jumpserver/jumpserver/) - 广受欢迎的开源堡垒机
 - [DataEase](https://github.com/dataease/dataease/) - 人人可用的开源数据可视化分析工具
-- [MeterSphere](https://github.com/metersphere/metersphere/) - 现代化、开源的测试管理及接口测试工具
+- [MeterSphere](https://github.com/metersphere/metersphere/) - 新一代的开源持续测试工具
 - [Halo](https://github.com/halo-dev/halo/) - 强大易用的开源建站工具
 
 ## License

@@ -9,10 +9,6 @@
     </div>
     <el-form
       @submit.prevent
-      @mousemove.stop
-      @mousedown.stop
-      @keydown.stop
-      @click.stop
       ref="FunctionNodeFormRef"
       :model="chat_data"
       label-position="top"
@@ -72,15 +68,13 @@
       </el-card>
 
       <h5 class="lighter mb-8">Python 代码</h5>
-      <div class="workflow-CodemirrorEditor mb-8" v-if="showEditor">
+      <div class="function-CodemirrorEditor mb-8" v-if="showEditor">
         <CodemirrorEditor
           v-model="chat_data.code"
           @wheel="wheel"
-          @keydown="isKeyDown = true"
-          @keyup="isKeyDown = false"
           style="height: 130px !important"
         />
-        <div class="workflow-CodemirrorEditor__footer">
+        <div class="function-CodemirrorEditor__footer">
           <el-button text type="info" @click="openCodemirrorDialog" class="magnify">
             <AppIcon iconName="app-magnify" style="font-size: 16px"></AppIcon>
           </el-button>
@@ -130,16 +124,15 @@ import { isLastNode } from '@/workflow/common/data'
 
 const props = defineProps<{ nodeModel: any }>()
 
-const isKeyDown = ref(false)
 const wheel = (e: any) => {
-  if (isKeyDown.value) {
+  if (e.ctrlKey === true) {
     e.preventDefault()
+    return true
   } else {
     e.stopPropagation()
     return true
   }
 }
-
 const FieldFormDialogRef = ref()
 const nodeCascaderRef = ref()
 
@@ -228,6 +221,4 @@ onMounted(() => {
   }, 100)
 })
 </script>
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

@@ -96,7 +96,7 @@ class NoReferencesSetting(serializers.Serializer):
 
 
 def valid_model_params_setting(model_id, model_params_setting):
-    if model_id is None:
+    if model_id is None or model_params_setting is None or len(model_params_setting.keys()) == 0:
         return
     model = QuerySet(Model).filter(id=model_id).first()
     credential = get_model_credential(model.provider, model.model_type, model.model_name)
@@ -416,6 +416,7 @@ class ApplicationSerializer(serializers.Serializer):
                                model_setting=application.get('model_setting'),
                                problem_optimization=application.get('problem_optimization'),
                                type=ApplicationTypeChoices.SIMPLE,
+                               model_params_setting=application.get('model_params_setting', {}),
                                work_flow={}
                                )
 
@@ -589,6 +590,13 @@ class ApplicationSerializer(serializers.Serializer):
             return FunctionLibSerializer.Operate(data={'user_id': application.user_id, 'id': function_lib_id}).one(
                 with_valid=True)
 
+        def get_model_params_form(self, model_id, with_valid=True):
+            if with_valid:
+                self.is_valid(raise_exception=True)
+            application = QuerySet(Application).filter(id=self.data.get("application_id")).first()
+            return ModelSerializer.ModelParams(
+                data={'user_id': application.user_id, 'id': model_id}).get_model_params(with_valid=True)
+
         def delete(self, with_valid=True):
             if with_valid:
                 self.is_valid()
@@ -689,7 +697,9 @@ class ApplicationSerializer(serializers.Serializer):
                 ApplicationSerializer.Edit(data=instance).is_valid(
                     raise_exception=True)
             application_id = self.data.get("application_id")
-            valid_model_params_setting(instance.get('model_id'), instance.get('model_params_setting'))
+            valid_model_params_setting(instance.get('model_id'),
+                                       instance.get('model_params_setting'))
+
             application = QuerySet(Application).get(id=application_id)
             if instance.get('model_id') is None or len(instance.get('model_id')) == 0:
                 application.model_id = None
