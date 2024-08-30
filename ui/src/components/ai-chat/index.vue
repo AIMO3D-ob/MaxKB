@@ -457,7 +457,7 @@ const errorWrite = (chat: any, message?: string) => {
   ChatManagement.updateStatus(chat.id, 500)
   ChatManagement.close(chat.id)
 }
-function chatMessage(chat?: any, problem?: string, re_chat?: boolean, retryCount = 0) {
+function chatMessage(chat?: any, problem?: string, re_chat?: boolean, retryCount = 0): Promise<void> {
   loading.value = true
   if (!chat) {
     chat = reactive({
@@ -480,7 +480,7 @@ function chatMessage(chat?: any, problem?: string, re_chat?: boolean, retryCount
     })
   }
 
-  const sendChatRequest = () => {
+  const sendChatRequest = (): Promise<void> => {
     if (!chartOpenId.value) {
       return getChartOpenId(chat).catch(() => {
         if (retryCount < 3) {
