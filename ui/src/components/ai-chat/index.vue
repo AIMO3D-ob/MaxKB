@@ -165,8 +165,6 @@ import useStore from '@/stores'
 import MdRenderer from '@/components/markdown/MdRenderer.vue'
 import { isWorkFlow } from '@/utils/application'
 import { debounce } from 'lodash'
-import { isMdArray } from '@/utils/someUtilFile'
-
 defineOptions({ name: 'AiChat' })
 const route = useRoute()
 const {
