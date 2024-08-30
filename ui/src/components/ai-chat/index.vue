@@ -613,19 +613,22 @@ onMounted(() => {
   }, 1800)
 })
 
-const autoPasteFromClipboard = async () => {
-  try {
-    const text = await navigator.clipboard.readText()
-    if (text) {
-      inputValue.value = text
-    }
-  } catch (err) {
-    console.error('Failed to read clipboard contents: ', err)
+const getInputFromURLAndChat = () => {
+  const queryParams = route.query
+  if (queryParams.input && typeof queryParams.input === 'string') {
+    const decodedInput = decodeURIComponent(queryParams.input)
+    inputValue.value = decodedInput
+    // Use nextTick to ensure the inputValue is updated before triggering the chat
+    nextTick(() => {
+      if (!loading.value) {
+        chatMessage(null, decodedInput)
+      }
+    })
   }
 }
 
 onMounted(() => {
-  autoPasteFromClipboard()
+  getInputFromURLAndChat()
 })
 
 defineExpose({
