@@ -458,7 +458,7 @@ const errorWrite = (chat: any, message?: string) => {
   ChatManagement.updateStatus(chat.id, 500)
   ChatManagement.close(chat.id)
 }
-function chatMessage(chat?: any, problem?: string, re_chat?: boolean) {
+function chatMessage(chat?: any, problem?: string, re_chat?: boolean, retryCount = 0) {
   loading.value = true
   if (!chat) {
     chat = reactive({
@@ -477,43 +477,41 @@ function chatMessage(chat?: any, problem?: string, re_chat?: boolean) {
     ChatManagement.write(chat.id)
     inputValue.value = ''
     nextTick(() => {
-      // 将滚动条滚动到最下面
       scrollDiv.value.setScrollTop(getMaxHeight())
     })
   }
-  if (!chartOpenId.value) {
-    getChartOpenId(chat).catch(() => {
-      errorWrite(chat)
-    })
-  } else {
+
+  const sendChatRequest = () => {
+    if (!chartOpenId.value) {
+      return getChartOpenId(chat).catch(() => {
+        if (retryCount < 3) {
+          return new Promise(resolve => setTimeout(resolve, 2000)).then(() => 
+            chatMessage(chat, problem, re_chat, retryCount + 1)
+          )
+        }
+        return errorWrite(chat)
+      })
+    }
+
     const obj = {
       message: chat.problem_text,
       re_chat: re_chat || false
     }
-    // 对话
-    applicationApi
+
+    return applicationApi
       .postChatMessage(chartOpenId.value, obj)
       .then((response) => {
         if (response.status === 401) {
-          application
-            .asyncAppAuthentication(accessToken)
-            .then(() => {
-              chatMessage(chat, problem)
-            })
-            .catch(() => {
-              errorWrite(chat)
-            })
-        } else if (response.status === 460) {
-          return Promise.reject('无法识别用户身份')
-        } else if (response.status === 461) {
-          return Promise.reject('抱歉，您的提问已达到最大限制，请明天再来吧！')
+          return application.asyncAppAuthentication(accessToken).then(() => 
+            chatMessage(chat, problem, re_chat, retryCount + 1)
+          )
+        } else if (response.status === 460 || response.status === 461) {
+          return Promise.reject(response.status === 460 ? '无法识别用户身份' : '抱歉，您的提问已达到最大限制，请明天再来吧！')
         } else {
           nextTick(() => {
-            // 将滚动条滚动到最下面
             scrollDiv.value.setScrollTop(getMaxHeight())
           })
           const reader = response.body.getReader()
-          // 处理流数据
           const write = getWrite(
             chat,
             reader,
@@ -533,9 +531,16 @@ function chatMessage(chat?: any, problem?: string, re_chat?: boolean) {
         ChatManagement.close(chat.id)
       })
       .catch((e: any) => {
+        if (retryCount < 3) {
+          return new Promise(resolve => setTimeout(resolve, 2000)).then(() => 
+            chatMessage(chat, problem, re_chat, retryCount + 1)
+          )
+        }
         errorWrite(chat, e + '')
       })
   }
+
+  return sendChatRequest()
 }
 
 function regenerationChart(item: chatType) {
