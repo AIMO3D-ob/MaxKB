@@ -618,7 +618,8 @@ const getInputFromURLAndChat = () => {
     })
   }
 }
-
+// 在组件挂载时调用 getInputFromURLAndChat 函数 
+// 自动获取url中的input参数，并进行对话
 onMounted(() => {
   getInputFromURLAndChat()
   setTimeout(() => {
