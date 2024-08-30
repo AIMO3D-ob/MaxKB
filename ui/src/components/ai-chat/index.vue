@@ -605,14 +605,6 @@ watch(
   { deep: true, immediate: true }
 )
 
-onMounted(() => {
-  setTimeout(() => {
-    if (quickInputRef.value && mode === 'embed') {
-      quickInputRef.value.textarea.style.height = '0'
-    }
-  }, 1800)
-})
-
 const getInputFromURLAndChat = () => {
   const queryParams = route.query
   if (queryParams.input && typeof queryParams.input === 'string') {
@@ -629,6 +621,11 @@ const getInputFromURLAndChat = () => {
 
 onMounted(() => {
   getInputFromURLAndChat()
+  setTimeout(() => {
+    if (quickInputRef.value && mode === 'embed') {
+      quickInputRef.value.textarea.style.height = '0'
+    }
+  }, 1800)
 })
 
 defineExpose({
