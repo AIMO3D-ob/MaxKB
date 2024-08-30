@@ -213,7 +213,6 @@ const chatList = ref<any[]>([])
 const isDisabledChart = computed(
   () => !(inputValue.value.trim() && (props.appId || props.data?.name))
 )
-const isMdArray = (val: string) => val.match(/^-\s.*/m)
 const prologueList = computed(() => {
   const temp = props.available
     ? props.data?.prologue
@@ -617,16 +616,18 @@ const getInputFromURLAndChat = () => {
     inputValue.value = decodedInput
     // Use nextTick to ensure the inputValue is updated before triggering the chat
     nextTick(() => {
-      if (!loading.value) {
+      if (!loading.value && !isDisabledChart.value) {
         chatMessage(null, decodedInput)
       }
     })
   }
 }
-// 在组件挂载时调用 getInputFromURLAndChat 函数 
-// 自动获取url中的input参数，并进行对话
+
 onMounted(() => {
-  getInputFromURLAndChat()
+  nextTick(() => {
+    getInputFromURLAndChat()
+  })
+  
   setTimeout(() => {
     if (quickInputRef.value && mode === 'embed') {
       quickInputRef.value.textarea.style.height = '0'
