@@ -88,3 +88,9 @@ export function getAttrsArray(array: Array<any>, attr: string) {
 export function getSum(array: Array<any>) {
   return array.reduce((total, item) => total + item, 0)
 }
+
+export function isMdArray(str: string): boolean {
+  // Implementation of isMdArray function
+  // Add the actual implementation here
+  return str.trim().startsWith('-');
+}
