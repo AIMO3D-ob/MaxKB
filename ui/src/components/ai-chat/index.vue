@@ -460,6 +460,7 @@ const errorWrite = (chat: any, message?: string) => {
   ChatManagement.close(chat.id)
 }
 function chatMessage(chat?: any, problem?: string, re_chat?: boolean) {
+  console.log('chatMessage called with:', { chat, problem, re_chat })
   loading.value = true
   if (!chat) {
     chat = reactive({
@@ -483,7 +484,9 @@ function chatMessage(chat?: any, problem?: string, re_chat?: boolean) {
     })
   }
   if (!chartOpenId.value) {
-    getChartOpenId(chat).catch(() => {
+    console.log('No chartOpenId, calling getChartOpenId')
+    getChartOpenId(chat).catch((error) => {
+      console.error('Error in getChartOpenId:', error)
       errorWrite(chat)
     })
   } else {
@@ -606,6 +609,22 @@ watch(
   { deep: true, immediate: true }
 )
 
+onMounted(() => {
+  console.log('Component mounted')
+  console.log('props.available:', props.available)
+  console.log('props.appId:', props.appId)
+  console.log('props.data?.name:', props.data?.name)
+
+  // 使用 setTimeout 确保页面完全加载后再处理 input
+  setTimeout(() => {
+    getInputFromURLAndSetInput()
+  }, 0)
+
+  if (quickInputRef.value && mode === 'embed') {
+    quickInputRef.value.textarea.style.height = '0'
+  }
+})
+
 const getInputFromURLAndSetInput = () => {
   const queryParams = route.query
   if (queryParams.input && typeof queryParams.input === 'string') {
@@ -637,22 +656,6 @@ const getInputFromURLAndSetInput = () => {
     console.log('No input parameter in URL')
   }
 }
-
-onMounted(() => {
-  console.log('Component mounted')
-  console.log('props.available:', props.available)
-  console.log('props.appId:', props.appId)
-  console.log('props.data?.name:', props.data?.name)
-
-  // 调用 getInputFromURLAndSetInput，不再直接调用 getInputFromURLAndChat
-  getInputFromURLAndSetInput()
-
-  setTimeout(() => {
-    if (quickInputRef.value && mode === 'embed') {
-      quickInputRef.value.textarea.style.height = '0'
-    }
-  }, 1800)
-})
 
 defineExpose({
   setScrollBottom
