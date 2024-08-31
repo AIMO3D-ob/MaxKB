@@ -451,6 +451,7 @@ const getWrite = (chat: any, reader: any, stream: boolean) => {
   }
   return stream ? write_stream : write_json
 }
+
 const errorWrite = (chat: any, message?: string) => {
   ChatManagement.addChatRecord(chat, 50, loading)
   ChatManagement.write(chat.id)
@@ -605,23 +606,47 @@ watch(
   { deep: true, immediate: true }
 )
 
-const getInputFromURLAndChat = () => {
+const getInputFromURLAndSetInput = () => {
   const queryParams = route.query
   if (queryParams.input && typeof queryParams.input === 'string') {
     const decodedInput = decodeURIComponent(queryParams.input)
     inputValue.value = decodedInput
-    // Use nextTick to ensure the inputValue is updated before triggering the chat
-    nextTick(() => {
-      if (!loading.value) {
-        chatMessage(null, decodedInput)
+    console.log('Input from URL set to input field:', decodedInput)
+
+    // 检查必要的条件
+    if (props.available && (props.appId || props.data?.name)) {
+      console.log('All conditions met, initiating chat')
+      // 使用 nextTick 确保 inputValue 在触发聊天之前已更新
+      nextTick(() => {
+        if (!loading.value) {
+          chatMessage(null, decodedInput)
+        } else {
+          console.log('Chat is already loading, not initiating new chat')
+        }
+      })
+    } else {
+      console.log('Conditions not met, input set but chat not initiated')
+      if (!props.available) {
+        console.log('Chat is not available')
       }
-    })
+      if (!props.appId && !props.data?.name) {
+        console.log('Missing required data: appId or data.name')
+      }
+    }
+  } else {
+    console.log('No input parameter in URL')
   }
 }
-// 在组件挂载时调用 getInputFromURLAndChat 函数 
-// 自动获取url中的input参数，并进行对话
+
 onMounted(() => {
-  getInputFromURLAndChat()
+  console.log('Component mounted')
+  console.log('props.available:', props.available)
+  console.log('props.appId:', props.appId)
+  console.log('props.data?.name:', props.data?.name)
+
+  // 调用 getInputFromURLAndSetInput，不再直接调用 getInputFromURLAndChat
+  getInputFromURLAndSetInput()
+
   setTimeout(() => {
     if (quickInputRef.value && mode === 'embed') {
       quickInputRef.value.textarea.style.height = '0'
