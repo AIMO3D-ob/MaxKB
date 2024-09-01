@@ -609,56 +609,32 @@ watch(
   { deep: true, immediate: true }
 )
 
+const autoPasteFromClipboard = async () => {
+  try {
+    const text = await navigator.clipboard.readText()
+    if (text) {
+      inputValue.value = text
+      console.log('Input from clipboard set to input field:', text)
+    }
+  } catch (err) {
+    console.error('Failed to read clipboard contents: ', err)
+  }
+}
+
 onMounted(() => {
   console.log('Component mounted')
   console.log('props.available:', props.available)
   console.log('props.appId:', props.appId)
   console.log('props.data?.name:', props.data?.name)
 
-  // 监听剪贴板事件
-  document.addEventListener('paste', handlePaste)
+  setTimeout(() => {
+    autoPasteFromClipboard()
+  }, 1800)
 
   if (quickInputRef.value && mode === 'embed') {
     quickInputRef.value.textarea.style.height = '0'
   }
 })
-
-onBeforeUnmount(() => {
-  // 移除剪贴板事件监听器
-  document.removeEventListener('paste', handlePaste)
-})
-
-const handlePaste = async (event: ClipboardEvent) => {
-  const clipboardData = event.clipboardData
-  if (clipboardData) {
-    const pastedText = clipboardData.getData('Text')
-    if (pastedText) {
-      inputValue.value = pastedText
-      console.log('Input from clipboard set to input field:', pastedText)
-
-      // 检查必要的条件
-      if (props.available && (props.appId || props.data?.name)) {
-        console.log('All conditions met, initiating chat')
-        // 使用 nextTick 确保 inputValue 在触发聊天之前已更新
-        nextTick(() => {
-          if (!loading.value) {
-            chatMessage(null, pastedText)
-          } else {
-            console.log('Chat is already loading, not initiating new chat')
-          }
-        })
-      } else {
-        console.log('Conditions not met, input set but chat not initiated')
-        if (!props.available) {
-          console.log('Chat is not available')
-        }
-        if (!props.appId && !props.data?.name) {
-          console.log('Missing required data: appId or data.name')
-        }
-      }
-    }
-  }
-}
 
 defineExpose({
   setScrollBottom
