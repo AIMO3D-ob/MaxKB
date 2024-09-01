@@ -152,7 +152,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, nextTick, computed, watch, reactive, onMounted } from 'vue'
+import { ref, nextTick, computed, watch, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import LogOperationButton from './LogOperationButton.vue'
 import OperationButton from './OperationButton.vue'
@@ -615,45 +615,48 @@ onMounted(() => {
   console.log('props.appId:', props.appId)
   console.log('props.data?.name:', props.data?.name)
 
-  // 使用 setTimeout 确保页面完全加载后再处理 input
-  setTimeout(() => {
-    getInputFromURLAndSetInput()
-  }, 0)
+  // 监听剪贴板事件
+  document.addEventListener('paste', handlePaste)
 
   if (quickInputRef.value && mode === 'embed') {
     quickInputRef.value.textarea.style.height = '0'
   }
 })
 
-const getInputFromURLAndSetInput = () => {
-  const queryParams = route.query
-  if (queryParams.input && typeof queryParams.input === 'string') {
-    const decodedInput = decodeURIComponent(queryParams.input)
-    inputValue.value = decodedInput
-    console.log('Input from URL set to input field:', decodedInput)
+onBeforeUnmount(() => {
+  // 移除剪贴板事件监听器
+  document.removeEventListener('paste', handlePaste)
+})
 
-    // 检查必要的条件
-    if (props.available && (props.appId || props.data?.name)) {
-      console.log('All conditions met, initiating chat')
-      // 使用 nextTick 确保 inputValue 在触发聊天之前已更新
-      nextTick(() => {
-        if (!loading.value) {
-          chatMessage(null, decodedInput)
-        } else {
-          console.log('Chat is already loading, not initiating new chat')
+const handlePaste = async (event: ClipboardEvent) => {
+  const clipboardData = event.clipboardData
+  if (clipboardData) {
+    const pastedText = clipboardData.getData('Text')
+    if (pastedText) {
+      inputValue.value = pastedText
+      console.log('Input from clipboard set to input field:', pastedText)
+
+      // 检查必要的条件
+      if (props.available && (props.appId || props.data?.name)) {
+        console.log('All conditions met, initiating chat')
+        // 使用 nextTick 确保 inputValue 在触发聊天之前已更新
+        nextTick(() => {
+          if (!loading.value) {
+            chatMessage(null, pastedText)
+          } else {
+            console.log('Chat is already loading, not initiating new chat')
+          }
+        })
+      } else {
+        console.log('Conditions not met, input set but chat not initiated')
+        if (!props.available) {
+          console.log('Chat is not available')
         }
-      })
-    } else {
-      console.log('Conditions not met, input set but chat not initiated')
-      if (!props.available) {
-        console.log('Chat is not available')
-      }
-      if (!props.appId && !props.data?.name) {
-        console.log('Missing required data: appId or data.name')
+        if (!props.appId && !props.data?.name) {
+          console.log('Missing required data: appId or data.name')
+        }
       }
     }
-  } else {
-    console.log('No input parameter in URL')
   }
 }
 
