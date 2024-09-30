@@ -23,6 +23,9 @@
             <el-button @click="openDatasetDialog()" :disabled="multipleSelection.length === 0">
               迁移
             </el-button>
+            <el-button @click="batchRefresh" :disabled="multipleSelection.length === 0">
+              重新向量化
+            </el-button>
             <el-button @click="openBatchEditDocument" :disabled="multipleSelection.length === 0">
               设置
             </el-button>
@@ -73,7 +76,55 @@
             </template>
           </el-table-column>
           <el-table-column prop="paragraph_count" label="分段" align="right" />
-          <el-table-column prop="status" label="文件状态" min-width="90">
+          <el-table-column prop="status" label="文件状态" width="130">
+            <template #header>
+              <div>
+                <span>文件状态</span>
+                <el-dropdown trigger="click" @command="dropdownHandle">
+                  <el-button
+                    style="margin-top: 1px"
+                    link
+                    :type="filterMethod['status'] ? 'primary' : ''"
+                  >
+                    <el-icon><Filter /></el-icon>
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu style="width: 100px">
+                      <el-dropdown-item
+                        :class="filterMethod['status'] ? '' : 'is-active'"
+                        :command="beforeCommand('status', '')"
+                        class="justify-center"
+                        >全部</el-dropdown-item
+                      >
+                      <el-dropdown-item
+                        :class="filterMethod['status'] === '1' ? 'is-active' : ''"
+                        class="justify-center"
+                        :command="beforeCommand('status', '1')"
+                        >成功</el-dropdown-item
+                      >
+                      <el-dropdown-item
+                        :class="filterMethod['status'] === '2' ? 'is-active' : ''"
+                        class="justify-center"
+                        :command="beforeCommand('status', '2')"
+                        >失败</el-dropdown-item
+                      >
+                      <el-dropdown-item
+                        :class="filterMethod['status'] === '0' ? 'is-active' : ''"
+                        class="justify-center"
+                        :command="beforeCommand('status', '0')"
+                        >索引中</el-dropdown-item
+                      >
+                      <el-dropdown-item
+                        :class="filterMethod['status'] === '3' ? 'is-active' : ''"
+                        class="justify-center"
+                        :command="beforeCommand('status', '3')"
+                        >排队中</el-dropdown-item
+                      >
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </template>
             <template #default="{ row }">
               <el-text v-if="row.status === '1'">
                 <el-icon class="success"><SuccessFilled /></el-icon> 成功
@@ -89,7 +140,43 @@
               </el-text>
             </template>
           </el-table-column>
-          <el-table-column label="启用状态">
+          <el-table-column width="130">
+            <template #header>
+              <div>
+                <span>启用状态</span>
+                <el-dropdown trigger="click" @command="dropdownHandle">
+                  <el-button
+                    style="margin-top: 1px"
+                    link
+                    :type="filterMethod['is_active'] ? 'primary' : ''"
+                  >
+                    <el-icon><Filter /></el-icon>
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu style="width: 100px">
+                      <el-dropdown-item
+                        :class="filterMethod['is_active'] === '' ? 'is-active' : ''"
+                        :command="beforeCommand('is_active', '')"
+                        class="justify-center"
+                        >全部</el-dropdown-item
+                      >
+                      <el-dropdown-item
+                        :class="filterMethod['is_active'] === true ? 'is-active' : ''"
+                        class="justify-center"
+                        :command="beforeCommand('is_active', true)"
+                        >开启</el-dropdown-item
+                      >
+                      <el-dropdown-item
+                        :class="filterMethod['is_active'] === false ? 'is-active' : ''"
+                        class="justify-center"
+                        :command="beforeCommand('is_active', false)"
+                        >关闭</el-dropdown-item
+                      >
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </template>
             <template #default="{ row }">
               <div @click.stop>
                 <el-switch
@@ -105,22 +192,26 @@
               <div>
                 <span>命中处理方式</span>
                 <el-dropdown trigger="click" @command="dropdownHandle">
-                  <el-button style="margin-top: 1px" link :type="filterMethod ? 'primary' : ''">
+                  <el-button
+                    style="margin-top: 1px"
+                    link
+                    :type="filterMethod['hit_handling_method'] ? 'primary' : ''"
+                  >
                     <el-icon><Filter /></el-icon>
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu style="width: 100px">
                       <el-dropdown-item
-                        :class="filterMethod ? '' : 'is-active'"
-                        command=""
+                        :class="filterMethod['hit_handling_method'] ? '' : 'is-active'"
+                        :command="beforeCommand('hit_handling_method', '')"
                         class="justify-center"
                         >全部</el-dropdown-item
                       >
                       <template v-for="(value, key) of hitHandlingMethod" :key="key">
                         <el-dropdown-item
-                          :class="filterMethod === key ? 'is-active' : ''"
+                          :class="filterMethod['hit_handling_method'] === key ? 'is-active' : ''"
                           class="justify-center"
-                          :command="key"
+                          :command="beforeCommand('hit_handling_method', key)"
                           >{{ value }}</el-dropdown-item
                         >
                       </template>
@@ -281,7 +372,7 @@ const SyncWebDialogRef = ref()
 const loading = ref(false)
 let interval: any
 const filterText = ref('')
-const filterMethod = ref<string | number>('')
+const filterMethod = ref<any>({})
 const documentData = ref<any[]>([])
 const currentMouseId = ref(null)
 const datasetDetail = ref<any>({})
@@ -318,9 +409,16 @@ function openDatasetDialog(row?: any) {
   SelectDatasetDialogRef.value.open(arr)
 }
 
-function dropdownHandle(val: string) {
-  filterMethod.value = val
+function dropdownHandle(obj: any) {
+  filterMethod.value[obj.attr] = obj.command
   getList()
+}
+
+function beforeCommand(attr: string, val: any) {
+  return {
+    attr: attr,
+    command: val
+  }
 }
 
 function syncDataset() {
@@ -443,6 +541,19 @@ function deleteMulDocument() {
   })
 }
 
+function batchRefresh() {
+  const arr: string[] = []
+  multipleSelection.value.map((v) => {
+    if (v) {
+      arr.push(v.id)
+    }
+  })
+  documentApi.batchRefresh(id, arr, loading).then(() => {
+    MsgSuccess('批量重新向量化成功')
+    multipleTableRef.value?.clearSelection()
+  })
+}
+
 function deleteDocument(row: any) {
   MsgConfirm(
     `是否删除文档：${row.name} ?`,
@@ -506,7 +617,7 @@ function handleSizeChange() {
 function getList(bool?: boolean) {
   const param = {
     ...(filterText.value && { name: filterText.value }),
-    ...(filterMethod.value && { hit_handling_method: filterMethod.value })
+    ...filterMethod.value
   }
   documentApi
     .getDocument(id as string, paginationConfig.value, param, bool ? undefined : loading)

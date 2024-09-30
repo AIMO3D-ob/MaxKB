@@ -14,7 +14,7 @@ import uuid
 from functools import reduce
 from typing import List, Dict
 
-import xlwt
+import openpyxl
 from celery_once import AlreadyQueued
 from django.core import validators
 from django.db import transaction
@@ -34,7 +34,8 @@ from common.handle.impl.qa.csv_parse_qa_handle import CsvParseQAHandle
 from common.handle.impl.qa.xls_parse_qa_handle import XlsParseQAHandle
 from common.handle.impl.qa.xlsx_parse_qa_handle import XlsxParseQAHandle
 from common.handle.impl.table.csv_parse_table_handle import CsvSplitHandle
-from common.handle.impl.table.excel_parse_table_handle import ExcelSplitHandle
+from common.handle.impl.table.xls_parse_table_handle import XlsSplitHandle
+from common.handle.impl.table.xlsx_parse_table_handle import XlsxSplitHandle
 from common.handle.impl.text_split_handle import TextSplitHandle
 from common.mixins.api_mixin import ApiMixin
 from common.util.common import post, flat_map
@@ -53,7 +54,7 @@ from embedding.task.embedding import embedding_by_document, delete_embedding_by_
 from smartdoc.conf import PROJECT_DIR
 
 parse_qa_handle_list = [XlsParseQAHandle(), CsvParseQAHandle(), XlsxParseQAHandle()]
-parse_table_handle_list = [CsvSplitHandle(), ExcelSplitHandle()]
+parse_table_handle_list = [CsvSplitHandle(), XlsSplitHandle(), XlsxSplitHandle()]
 
 
 class FileBufferHandle:
@@ -489,25 +490,27 @@ class DocumentSerializers(ApiMixin, serializers.Serializer):
             data_dict, document_dict = self.merge_problem(paragraph_list, problem_mapping_list, [document])
             workbook = self.get_workbook(data_dict, document_dict)
             response = HttpResponse(content_type='application/vnd.ms-excel')
-            response['Content-Disposition'] = f'attachment; filename="data.xls"'
+            response['Content-Disposition'] = f'attachment; filename="data.xlsx"'
             workbook.save(response)
             return response
 
         @staticmethod
         def get_workbook(data_dict, document_dict):
             # 创建工作簿对象
-            workbook = xlwt.Workbook(encoding='utf-8')
+            workbook = openpyxl.Workbook()
+            workbook.remove_sheet(workbook.active)
             for sheet_id in data_dict:
                 # 添加工作表
-                worksheet = workbook.add_sheet(document_dict.get(sheet_id))
+                worksheet = workbook.create_sheet(document_dict.get(sheet_id))
                 data = [
                     ['分段标题（选填）', '分段内容（必填，问题答案，最长不超过4096个字符）', '问题（选填，单元格内一行一个）'],
-                    *data_dict.get(sheet_id)
+                    *data_dict.get(sheet_id, [])
                 ]
                 # 写入数据到工作表
                 for row_idx, row in enumerate(data):
                     for col_idx, col in enumerate(row):
-                        worksheet.write(row_idx, col_idx, col)
+                        cell = worksheet.cell(row=row_idx + 1, column=col_idx + 1)
+                        cell.value = col
                     # 创建HttpResponse对象返回Excel文件
             return workbook
 
@@ -663,7 +666,7 @@ class DocumentSerializers(ApiMixin, serializers.Serializer):
             get_buffer = FileBufferHandle().get_buffer
             for parse_qa_handle in parse_qa_handle_list:
                 if parse_qa_handle.support(file, get_buffer):
-                    return parse_qa_handle.handle(file, get_buffer)
+                    return parse_qa_handle.handle(file, get_buffer, save_image)
             raise AppApiException(500, '不支持的文件格式')
 
         @staticmethod
@@ -671,7 +674,7 @@ class DocumentSerializers(ApiMixin, serializers.Serializer):
             get_buffer = FileBufferHandle().get_buffer
             for parse_table_handle in parse_table_handle_list:
                 if parse_table_handle.support(file, get_buffer):
-                    return parse_table_handle.handle(file, get_buffer)
+                    return parse_table_handle.handle(file, get_buffer, save_image)
             raise AppApiException(500, '不支持的文件格式')
 
         def save_qa(self, instance: Dict, with_valid=True):
@@ -972,7 +975,8 @@ split_handles = [HTMLSplitHandle(), DocSplitHandle(), PdfSplitHandle(), default_
 
 
 def save_image(image_list):
-    QuerySet(Image).bulk_create(image_list)
+    if image_list is not None and len(image_list) > 0:
+        QuerySet(Image).bulk_create(image_list)
 
 
 def file_to_paragraph(file, pattern_list: List, with_filter: bool, limit: int):

@@ -10,110 +10,14 @@ from setting.models_provider.base_model_provider import IModelProvider, ModelPro
 from setting.models_provider.impl.xinference_model_provider.credential.embedding import \
     XinferenceEmbeddingModelCredential
 from setting.models_provider.impl.xinference_model_provider.credential.llm import XinferenceLLMModelCredential
+from setting.models_provider.impl.xinference_model_provider.credential.reranker import XInferenceRerankerModelCredential
 from setting.models_provider.impl.xinference_model_provider.model.embedding import XinferenceEmbedding
 from setting.models_provider.impl.xinference_model_provider.model.llm import XinferenceChatModel
+from setting.models_provider.impl.xinference_model_provider.model.reranker import XInferenceReranker
 from smartdoc.conf import PROJECT_DIR
 
 xinference_llm_model_credential = XinferenceLLMModelCredential()
 model_info_list = [
-    ModelInfo(
-        'aquila2',
-        'Aquila2 是一个具有 340 亿参数的大规模语言模型，支持中英文双语。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'aquila2-chat',
-        'Aquila2 Chat 是一个聊天模型版本的 Aquila2，支持中英文双语。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'aquila2-chat-16k',
-        'Aquila2 Chat 16K 是一个聊天模型版本的 Aquila2，支持长达 16K 令牌的上下文。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'baichuan',
-        'Baichuan 是一个大规模语言模型，具有 130 亿参数。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'baichuan-2',
-        'Baichuan 2 是 Baichuan 的更新版本，具有更高的性能。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'baichuan-2-chat',
-        'Baichuan 2 Chat 是一个聊天模型版本的 Baichuan 2。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'baichuan-chat',
-        'Baichuan Chat 是一个聊天模型版本的 Baichuan。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'c4ai-command-r-v01',
-        'C4AI Command R V01 是一个用于执行命令的语言模型。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'chatglm',
-        'ChatGLM 是一个聊天模型，特别擅长中文对话。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'chatglm2',
-        'ChatGLM2 是 ChatGLM 的更新版本，具有更好的性能。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'chatglm2-32k',
-        'ChatGLM2 32K 是一个聊天模型版本的 ChatGLM2，支持长达 32K 令牌的上下文。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'chatglm3',
-        'ChatGLM3 是 ChatGLM 的第三个版本，具有更高的性能。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'chatglm3-128k',
-        'ChatGLM3 128K 是一个聊天模型版本的 ChatGLM3，支持长达 128K 令牌的上下文。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'chatglm3-32k',
-        'ChatGLM3 32K 是一个聊天模型版本的 ChatGLM3，支持长达 32K 令牌的上下文。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
     ModelInfo(
         'code-llama',
         'Code Llama 是一个专门用于代码生成的语言模型。',
@@ -136,13 +40,6 @@ model_info_list = [
         XinferenceChatModel
     ),
     ModelInfo(
-        'codegeex4',
-        'CodeGeeX4 是一个用于代码生成的语言模型，具有较高的性能。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
         'codeqwen1.5',
         'CodeQwen 1.5 是一个用于代码生成的语言模型，具有较高的性能。',
         ModelTypeConst.LLM,
@@ -152,41 +49,6 @@ model_info_list = [
     ModelInfo(
         'codeqwen1.5-chat',
         'CodeQwen 1.5 Chat 是一个聊天模型版本的 CodeQwen 1.5。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'codeshell',
-        'CodeShell 是一个用于代码生成的语言模型。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'codeshell-chat',
-        'CodeShell Chat 是一个聊天模型版本的 CodeShell。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'codestral-v0.1',
-        'CodeStral V0.1 是一个用于代码生成的语言模型。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'cogvlm2',
-        'CogVLM2 是一个视觉语言模型，能够处理图像和文本输入。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'csg-wukong-chat-v0.1',
-        'CSG Wukong Chat V0.1 是一个聊天模型版本的 CSG Wukong。',
         ModelTypeConst.LLM,
         xinference_llm_model_credential,
         XinferenceChatModel
@@ -222,34 +84,6 @@ model_info_list = [
     ModelInfo(
         'deepseek-vl-chat',
         'Deepseek VL Chat 是 Deepseek 的视觉语言聊天模型版本，能够处理图像和文本输入。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'falcon',
-        'Falcon 是一个开源的 Transformer 解码器模型，具有 400 亿参数，旨在生成高质量的文本。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'falcon-instruct',
-        'Falcon Instruct 是 Falcon 语言模型的指令微调版本，专为执行特定任务而设计。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'gemma-2-it',
-        'GEMMA-2-IT 是一个基于 GEMMA-2 的意大利语模型，具有 130 亿参数。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'gemma-it',
-        'GEMMA-IT 是一个基于 GEMMA 的意大利语模型，具有 130 亿参数。',
         ModelTypeConst.LLM,
         xinference_llm_model_credential,
         XinferenceChatModel
@@ -304,20 +138,6 @@ model_info_list = [
         XinferenceChatModel
     ),
     ModelInfo(
-        'moss',
-        'MOSS 是一个大规模语言模型，具有 130 亿参数。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
-        'moss-chat',
-        'MOSS Chat 是一个聊天模型版本的 MOSS。',
-        ModelTypeConst.LLM,
-        xinference_llm_model_credential,
-        XinferenceChatModel
-    ),
-    ModelInfo(
         'qwen',
         'Qwen 是一个大规模语言模型，具有 130 亿参数。',
         ModelTypeConst.LLM,
@@ -367,50 +187,85 @@ model_info_list = [
         XinferenceChatModel
     ),
     ModelInfo(
-        'spark2',
-        'Spark2 是一个大规模语言模型，具有 130 亿参数。',
+        'qwen2-instruct',
+        'Qwen2 Instruct 是 Qwen2 的指令微调版本，专为执行特定任务而设计。',
         ModelTypeConst.LLM,
         xinference_llm_model_credential,
         XinferenceChatModel
     ),
     ModelInfo(
-        'spark2-chat',
-        'Spark2 Chat 是一个聊天模型版本的 Spark2。',
+        'qwen2-72b-instruct',
+        '',
         ModelTypeConst.LLM,
         xinference_llm_model_credential,
         XinferenceChatModel
     ),
     ModelInfo(
-        'spark2-chat-32k',
-        'Spark2 Chat 32K 是一个聊天模型版本的 Spark2，支持长达 32K 令牌的上下文。',
+        'qwen2-57b-a14b-instruct',
+        '',
         ModelTypeConst.LLM,
         xinference_llm_model_credential,
         XinferenceChatModel
     ),
     ModelInfo(
-        'spark2-code',
-        'Spark2 Code 是一个专门用于代码生成的语言模型。',
+        'qwen2-7b-instruct',
+        '',
         ModelTypeConst.LLM,
         xinference_llm_model_credential,
         XinferenceChatModel
     ),
     ModelInfo(
-        'spark2-code-chat',
-        'Spark2 Code Chat 是一个聊天模型版本的 Spark2 Code。',
+        'qwen2.5-72b-instruct',
+        '',
         ModelTypeConst.LLM,
         xinference_llm_model_credential,
         XinferenceChatModel
     ),
     ModelInfo(
-        'spark2-vl',
-        'Spark2 VL 是 Spark2 的视觉语言模型版本，能够处理图像和文本输入。',
+        'qwen2.5-32b-instruct',
+        '',
         ModelTypeConst.LLM,
         xinference_llm_model_credential,
         XinferenceChatModel
     ),
     ModelInfo(
-        'spark2-vl-chat',
-        'Spark2 VL Chat 是 Spark2 VL 的聊天模型版本，能够处理图像和文本输入。',
+        'qwen2.5-14b-instruct',
+        '',
+        ModelTypeConst.LLM,
+        xinference_llm_model_credential,
+        XinferenceChatModel
+    ),
+    ModelInfo(
+        'qwen2.5-7b-instruct',
+        '',
+        ModelTypeConst.LLM,
+        xinference_llm_model_credential,
+        XinferenceChatModel
+    ),
+    ModelInfo(
+        'qwen2.5-1.5b-instruct',
+        '',
+        ModelTypeConst.LLM,
+        xinference_llm_model_credential,
+        XinferenceChatModel
+    ),
+    ModelInfo(
+        'qwen2.5-0.5b-instruct',
+        '',
+        ModelTypeConst.LLM,
+        xinference_llm_model_credential,
+        XinferenceChatModel
+    ),
+    ModelInfo(
+        'qwen2.5-3b-instruct',
+        '',
+        ModelTypeConst.LLM,
+        xinference_llm_model_credential,
+        XinferenceChatModel
+    ),
+    ModelInfo(
+        'minicpm-llama3-v-2_5',
+        'MiniCPM-Llama3-V 2.5是MiniCPM-V系列中的最新型号，该模型基于SigLip-400M和Llama3-8B-Instruct构建，共有8B个参数',
         ModelTypeConst.LLM,
         xinference_llm_model_credential,
         XinferenceChatModel
@@ -480,7 +335,9 @@ embedding_model_info = [
     ModelInfo('text2vec-large-chinese', 'Text2Vec 的中文大型版本嵌入模型。', ModelTypeConst.EMBEDDING,
               xinference_embedding_model_credential, XinferenceEmbedding),
 ]
-
+rerank_list = [ModelInfo('bce-reranker-base_v1',
+                         '发布新的重新排名器，建立在强大的 M3 和LLM （GEMMA 和 MiniCPM，实际上没那么大）骨干上，支持多语言处理和更大的输入，大幅提高 BEIR、C-MTEB/Retrieval 的排名性能、MIRACL、LlamaIndex 评估',
+                         ModelTypeConst.RERANKER, XInferenceRerankerModelCredential(), XInferenceReranker)]
 model_info_manage = (ModelInfoManage.builder().append_model_info_list(model_info_list).append_default_model_info(
     ModelInfo(
         'phi3',
@@ -492,6 +349,7 @@ model_info_manage = (ModelInfoManage.builder().append_model_info_list(model_info
         '',
         '',
         ModelTypeConst.EMBEDDING, xinference_embedding_model_credential, XinferenceEmbedding))
+                     .append_model_info_list(rerank_list).append_default_model_info(rerank_list[0])
                      .build())
 
 
